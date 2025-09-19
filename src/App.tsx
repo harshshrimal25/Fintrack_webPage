@@ -21,6 +21,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
   </QueryClientProvider>
 );
 
