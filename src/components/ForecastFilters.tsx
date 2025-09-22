@@ -8,43 +8,65 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useForecastFilters } from "../context/ForecastContext";
 
 const ForecastFilters = () => {
+  const { filters, updateFilters, resetFilters } = useForecastFilters();
+
+  const handleFiscalYearChange = (value: string) => {
+    updateFilters({ fiscalYear: value });
+  };
+
+  const handleProvidersChange = (value: string) => {
+    updateFilters({ providers: value });
+  };
+
+  const handlePeriodChange = (value: "monthly" | "quarterly" | "yearly") => {
+    updateFilters({ period: value });
+  };
+
+  const removeOrganizationFilter = () => {
+    updateFilters({ organization: [] });
+  };
+
+  const removePreviousFilter = () => {
+    updateFilters({ previous: "" });
+  };
+
   return (
     <div className="bg-card border-b border-dashboard-border px-6 py-4">
       <div className="flex items-center justify-between mb-4">
-        {" "}
-        <h1 className="text-2xl font-semibold text-foreground">
-          Forecasts
-        </h1>{" "}
+        <h1 className="text-2xl font-semibold text-foreground">Forecasts</h1>
         <div className="flex items-center space-x-2">
-          {" "}
           <Button size="sm" variant="outline">
-            {" "}
-            <Search className="h-4 w-4 mr-2" /> Search{" "}
-          </Button>{" "}
+            <Search className="h-4 w-4 mr-2" /> Search
+          </Button>
           <Button size="sm" variant="outline">
-            {" "}
-            Export{" "}
-          </Button>{" "}
+            Export
+          </Button>
           <Button size="sm" variant="outline">
-            {" "}
-            Settings{" "}
-          </Button>{" "}
-        </div>{" "}
-      </div>
-      <div className="flex items-center space-x-4 flex-wrap gap-y-2">
-        <div className="flex items-center space-x-2">
-          <Badge
-            // variant="secondary"
-            className="bg-primary text-primary-foreground"
-          >
-            Org : ALL Selected
-            <X className="ml-1 h-3 w-3" />
-          </Badge>
+            Settings
+          </Button>
         </div>
+      </div>
 
-        <Select defaultValue="2025">
+      <div className="flex items-center space-x-4 flex-wrap gap-y-2">
+        {filters.organization.length > 0 && (
+          <div className="flex items-center space-x-2">
+            <Badge className="bg-primary text-primary-foreground">
+              Org : {filters.organization.join(", ")} Selected
+              <X
+                className="ml-1 h-3 w-3 cursor-pointer"
+                onClick={removeOrganizationFilter}
+              />
+            </Badge>
+          </div>
+        )}
+
+        <Select
+          value={filters.fiscalYear}
+          onValueChange={handleFiscalYearChange}
+        >
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="FY" />
           </SelectTrigger>
@@ -55,7 +77,7 @@ const ForecastFilters = () => {
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all">
+        <Select value={filters.providers} onValueChange={handleProvidersChange}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="All providers" />
           </SelectTrigger>
@@ -66,17 +88,19 @@ const ForecastFilters = () => {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center space-x-2">
-          <Badge
-            // variant="secondary"
-            className="bg-primary text-primary-foreground"
-          >
-            Previous: P05-Mar-FY25
-            <X className="ml-1 h-3 w-3" />
-          </Badge>
-        </div>
+        {filters.previous && (
+          <div className="flex items-center space-x-2">
+            <Badge className="bg-primary text-primary-foreground">
+              Previous: {filters.previous}
+              <X
+                className="ml-1 h-3 w-3 cursor-pointer"
+                onClick={removePreviousFilter}
+              />
+            </Badge>
+          </div>
+        )}
 
-        <Select defaultValue="monthly">
+        <Select value={filters.period} onValueChange={handlePeriodChange}>
           <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="Monthly" />
           </SelectTrigger>
@@ -87,23 +111,9 @@ const ForecastFilters = () => {
           </SelectContent>
         </Select>
 
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={resetFilters}>
           Reset All
         </Button>
-        {/* <div className="flex justify-end mr-4">
-          <div className="flex items-center space-x-2 ml-4">
-            <Button size="sm" variant="outline">
-              <Search className="h-4 w-4 mr-2" />
-              Search
-            </Button>
-            <Button size="sm" variant="outline">
-              Export
-            </Button>
-            <Button size="sm" variant="outline">
-              Settings
-            </Button>
-          </div>
-        </div> */}
       </div>
     </div>
   );

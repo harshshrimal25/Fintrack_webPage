@@ -2,111 +2,13 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-
-interface ForecastRow {
-  id: string;
-  name: string;
-  status?: "Active" | "Inactive";
-  isExpandable: boolean;
-  children?: ForecastRow[];
-  quarters: {
-    // Q4 columns
-    q4_jul: string;
-    // Q1 columns
-    q1_aug: string;
-    q1_sep: string;
-    q1_oct: string;
-    // Q2 columns
-    q2_nov: string;
-    q2_dec: string;
-    q2_jan: string;
-    // Q3 columns
-    q3_feb: string;
-    q3_mar: string;
-    q3_apr: string;
-    q4_may: string;
-  };
-}
-
-const tableData: ForecastRow[] = [
-  {
-    id: "total",
-    name: "Total",
-    isExpandable: true,
-    quarters: {
-      q4_jul: "$1,234,567",
-      q1_aug: "$1,456,789",
-      q1_sep: "$1,345,678",
-      q1_oct: "$1,567,890",
-      q2_nov: "$1,678,901",
-      q2_dec: "$1,789,012",
-      q2_jan: "$1,890,123",
-      q3_feb: "$1,901,234",
-      q3_mar: "$2,012,345",
-      q3_apr: "$2,123,456",
-      q4_may: "$2,234,567",
-    },
-  },
-  {
-    id: "acare",
-    name: "ACARE | Unlinked",
-    status: "Active",
-    isExpandable: true,
-    quarters: {
-      q4_jul: "$456,789",
-      q1_aug: "$567,890",
-      q1_sep: "$523,456",
-      q1_oct: "$612,345",
-      q2_nov: "$678,901",
-      q2_dec: "$734,567",
-      q2_jan: "$789,012",
-      q3_feb: "$801,234",
-      q3_mar: "$856,789",
-      q3_apr: "$912,345",
-      q4_may: "$967,890",
-    },
-  },
-  {
-    id: "acw",
-    name: "ACW | Unlinked",
-    status: "Active",
-    isExpandable: true,
-    quarters: {
-      q4_jul: "$345,678",
-      q1_aug: "$423,456",
-      q1_sep: "$389,012",
-      q1_oct: "$456,789",
-      q2_nov: "$501,234",
-      q2_dec: "$567,890",
-      q2_jan: "$612,345",
-      q3_feb: "$658,901",
-      q3_mar: "$701,234",
-      q3_apr: "$756,789",
-      q4_may: "$812,345",
-    },
-  },
-  {
-    id: "adplatforms",
-    name: "Ad Platforms | Unlinked",
-    status: "Active",
-    isExpandable: true,
-    quarters: {
-      q4_jul: "$432,100",
-      q1_aug: "$465,443",
-      q1_sep: "$433,210",
-      q1_oct: "$498,756",
-      q2_nov: "$499,766",
-      q2_dec: "$486,555",
-      q2_jan: "$488,766",
-      q3_feb: "$441,099",
-      q3_mar: "$454,322",
-      q3_apr: "$454,322",
-      q4_may: "$454,332",
-    },
-  },
-];
+import { useForecastFilters } from "../context/ForecastContext";
+import { useForecastTable } from "../hooks/useForecastData";
+import { ForecastTableRow } from "../types/forecast";
 
 const ForecastTable = () => {
+  const { filters } = useForecastFilters();
+  const { data, loading, error } = useForecastTable(filters);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const toggleRow = (id: string) => {
@@ -118,6 +20,30 @@ const ForecastTable = () => {
     }
     setExpandedRows(newExpanded);
   };
+
+  if (loading) {
+    return (
+      <div className="px-6 pb-6">
+        <div className="bg-card border border-dashboard-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-6 pb-6">
+        <div className="bg-card border border-dashboard-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-red-500">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-6 pb-6">
@@ -186,7 +112,7 @@ const ForecastTable = () => {
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row) => (
+              {data?.map((row: ForecastTableRow) => (
                 <tr
                   key={row.id}
                   className="border-b border-dashboard-border hover:bg-dashboard-subtle/50"
@@ -259,7 +185,7 @@ const ForecastTable = () => {
                     {row.quarters.q3_apr}
                   </td>
                 </tr>
-              ))}
+              )) || []}
             </tbody>
           </table>
         </div>
